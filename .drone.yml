@@ -1,14 +1,29 @@
-workspace:
-  base: /go
-  path: src/github.com/drone-demos/drone-with-go
+# Drone CI Pipeline
 
-pipeline:
-  test:
-    image: golang:latest
-    commands:
-      - go vet
-      - go test -v -cover
-  build:
-    image: golang:latest
-    commands:
-      - go build
+kind: pipeline
+type: kubernetes
+name: default
+
+steps:
+
+- name: build
+  image: golang:1.13
+  commands:
+    - "go build -o ./myap"
+
+- name: test
+  image: golang:1.13
+  commands:
+  - "go vet"
+  - "go test -v -cover"
+
+- name: publish  
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    repo: akim309/demo-repo
+    auto_tag: true
+    auto_tag_suffix: drone-build
